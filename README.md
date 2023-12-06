@@ -260,7 +260,7 @@ PHP-only short-circuit FizzBuzz code:
 ```php
 while($i++<100)echo[Fizz][$i%3].[Buzz][$i%5]?:$i,~õ;
 ```
-This code is 52 bytes.
+The above code is 52 bytes.
 
 Ok, so we should probably put this code in a file to execute. Unfortunately, to run this from a file, we need to increases our character count a little bit because PHP requires a start tag to interpret the parts of files containing actual PHP code even if it is the only thing in the file. If we use PHP version 7.4 or earlier, we can potentially get away with using PHP short tags which means we just need to prepend the code with `<?=` (no spaces necessary). This brings the minimum valid PHP file byte count to 54. The worse news is PHP short tags were removed in PHP 8.0 and require `<?php ` (followed by a space) before the code. This brings the minimum valid PHP file byte count to 58.
 
@@ -277,3 +277,21 @@ I wrote the initial FizzBuzz code at the top of this document in about a minute.
 
 I attempted to get ChatGPT to tackle this problem for a while. I requested it to produce PHP code to output FizzBuzz using the shortest possible code. It provided me with broken code. I requested and requested in a number of ways that it was broken, not short enough, or not producing a correct FizzBuzz sequence. I got it to produce 13 different pieces of code until I figured it simply wouldn't be able to do it.
 
+## Other Approaches
+
+I found [this Reddit comment](https://www.reddit.com/r/PHP/comments/2hz5l2/comment/ckxcldr/) showing another interesting method:
+
+```php
+while($i++<100)echo$i%3?!$$i=$i:Fizz,$i%5?$$i:Buzz,~õ;
+```
+The above code is 54 bytes.
+
+Although it's just 2 more bytes than the code we've been working on, it works in a completely different way. We can undress it to see exactly what it's doing. Straight away we see the `echo` is taking 3 arguments: One responsible for outputting Fizz, one for Buzz, and the new line. If we separate those out, add some whitespaces, it makes it a little bit clearer but it's still logically hard to see what's going on.
+
+```php
+while($i++<100) {
+  echo $i%3 ? !$$i=$i : Fizz;
+  echo $i%5 ?  $$i    : Buzz;
+  echo ~õ;
+}
+```
