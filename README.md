@@ -215,7 +215,7 @@ Remove the whitespaces and new line, we have a 1-liner:
 ```php
 while(@$i++<40)echo@[Fizz][$i%3].@[Buzz][$i%5]?:$i,"\n";
 ```
-The above code is 57 bytes.
+The above code is 56 bytes.
 
 #### The Final Touch
 Everything written above I understand fully, the behaviours and quirks of PHP are very well-known to me.
@@ -227,7 +227,7 @@ They replaced the final `"\n"` with something very clever. They managed to squee
 ```php
 while(@$i++<40)echo@[Fizz][$i%3].@[Buzz][$i%5]?:$i,@~õ;
 ```
-The above code is 56 bytes.
+The above code is 55 bytes.
 
 What on Earth is `~õ` you're probably asking yourself, remembering the `@` is error-suppression. This works the same as `~"õ"` like you would a normal string.
 
@@ -254,17 +254,24 @@ Notice the binary values are inverse of each other.
 We used error suppression techniques to get away with some syntax-bending practices. We do this because sometimes PHP errors show up when we don't want them to, we know what we're doing is wrong but we don't care in this exercise, so we used `@` in our code a number of times. We're doing this assuming our PHP interpreter is configured to show errors; however, if our PHP interpreter is configured to **not** show errors, we can strip all those `@` symbols out.
 
 PHP error reporting can be turned off in `php.ini` with `display_errors = 0`.
-The cheat is that it can also be turned off with `error_reporting(0);` at runtime.
+A cheat is that it can also be turned off with `error_reporting(0);` at runtime.
 
-The final short-circuit FizzBuzz code:
+PHP-only short-circuit FizzBuzz code:
 ```php
 while($i++<100)echo[Fizz][$i%3].[Buzz][$i%5]?:$i,~õ;
 ```
 This code is 52 bytes.
 
+Ok, so we should probably put this code in a file to execute. Unfortunately, to run this from a file, we need to increases our character count a little bit because PHP requires a start tag to interpret the parts of files containing actual PHP code even if it is the only thing in the file. If we use PHP version 7.4 or earlier, we can potentially get away with using PHP short tags which means we just need to prepend the code with `<?=` (no spaces necessary). This brings the minimum valid PHP file byte count to 54. The worse news is PHP short tags were removed in PHP 8.0 and require `<?php ` (followed by a space) before the code. This brings the minimum valid PHP file byte count to 58.
+
 #### Last Thoughts
+The final byte count is open to interpretation. Most people would only count the parts of the code that are the make-up of the actual task only and not include things like start tags, error report disabling, or tinkering with different versions of PHP interpreters.
+
 While short-circuited code like this is very fun to work on, I strongly advise developers not to intentionally code like this especially when working as part of a team who are expected to maintain the code you write. It will be irritating for them and it would be very difficult to read or understand for most people.
 
 Short-circuit coding can get unimaginably more complex using barely-documented behaviours and can include taking advantage of quirks and bugs present in the interpreter to squeeze every little byte out of code. As much as I enjoy exploring and learning the amazing behaviour of interpreters and baffling people with code that looks somebody had a seizure on the keyboard, because many coding languages evolve over time, including PHP, some practices, bugs, and behaviours may change and therefore some syntaxes may not be very sustainable. Some practices may potentially adversely affect the performance of code if executed a lot in a short amount of time (such as the `@` error suppression).
 
-I wrote the initial FizzBuzz code at the top of this document in about a minute. Ordinarily I would move on, but the challenge of pushing myself and testing code and seeing what does what, where I can place symbols, running various parallel tests to figure out the behaviours. It keeps me interested and motivated to learn more every time.
+I wrote the initial FizzBuzz code at the top of this document in about a minute. Ordinarily I would move on, but the challenge of pushing myself and testing code and seeing what does what, where I can place symbols, running various parallel tests to figure out the behaviours. It keeps me interested and motivated to learn more every time. I may not have written this document for 6 hours if not for short circuiting.
+
+I attempted to get ChatGPT to tackle this problem for a while. I requested it to produce PHP code to output FizzBuzz using the shortest possible code. It provided me with broken code. I requested and requested in a number of ways that it was broken, not short enough, or not producing a correct FizzBuzz sequence. I got it to produce 13 different pieces of code until I figured it simply wouldn't be able to do it.
+
