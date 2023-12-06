@@ -15,7 +15,7 @@ error_reporting(E_ALL);
 ```
 This will notify us of any problems and help guide us to writing more strict, production-worthy code and adhering to the PHP syntax. This wouldn't be a concern for most people but we will really be pushing the limits of code reduction further on.
 
-- For this document, I will omit the PHP start (`<?`) and end (`?>`) tags.
+- For this document, I will omit the PHP start (`<?=`, `<?php `) and end (`?>`) tags.
 - All code can safely be saved as ANSI or UTF-8 without any issues unless stated otherwise (which it will). 
 - I will limit output examples to the first 20 lines as that is generally enough lines to see the code is working.
 - Counting bytes on a Windows machine usually means a new line constitutes 2 bytes for "\r\n".
@@ -264,8 +264,10 @@ This code is 52 bytes.
 
 Ok, so we should probably put this code in a file to execute. Unfortunately, to run this from a file, we need to increases our character count a little bit because PHP requires a start tag to interpret the parts of files containing actual PHP code even if it is the only thing in the file. If we use PHP version 7.4 or earlier, we can potentially get away with using PHP short tags which means we just need to prepend the code with `<?=` (no spaces necessary). This brings the minimum valid PHP file byte count to 54. The worse news is PHP short tags were removed in PHP 8.0 and require `<?php ` (followed by a space) before the code. This brings the minimum valid PHP file byte count to 58.
 
+Because PHP 8.0 and above has established itself since 2020, the file in this directory called `fizzbuzz.php` contains 58 bytes with the long start tag.
+
 #### Last Thoughts
-The final byte count is open to interpretation. Most people would only count the parts of the code that are the make-up of the actual task only and not include things like start tags, error report disabling, or tinkering with different versions of PHP interpreters.
+The final byte count is open to interpretation. Most people would only count the parts of the code that are the make-up of the actual task only and not include things like start tags, error report disabling, or tinkering with different versions of PHP interpreters. These are mostly just setup steps and not directly related to the FizzBuzz code.
 
 While short-circuited code like this is very fun to work on, I strongly advise developers not to intentionally code like this especially when working as part of a team who are expected to maintain the code you write. It will be irritating for them and it would be very difficult to read or understand for most people.
 
