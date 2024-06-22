@@ -213,9 +213,9 @@ The above code is 61 bytes.
 
 Remove the whitespaces and new line, we have a 1-liner:
 ```php
-while(@$i++<40)echo@[Fizz][$i%3].@[Buzz][$i%5]?:$i,"\n";
+while(@$i++<100)echo@[Fizz][$i%3].@[Buzz][$i%5]?:$i,"\n";
 ```
-The above code is 56 bytes.
+The above code is 57 bytes.
 
 ## The Final Touch
 Everything written above I understand fully, the behaviours and quirks of PHP are very well-known to me.
@@ -286,7 +286,77 @@ while($i++<100)echo$i%3?!$$i=$i:Fizz,$i%5?$$i:Buzz,~õ;
 ```
 The above code is 54 bytes.
 
-Although it's just 2 more bytes than the code we've been working on, it works in a completely different way. We can undress it to see exactly what it's doing. Straight away we see the `echo` is taking 3 arguments: One responsible for outputting Fizz, one for Buzz, and the new line. If we separate those out, add some whitespaces, it makes it a little bit clearer but it's still logically hard to see what's going on.
+Although it's just 2 more bytes than the code we've been working on, it works in a completely different way. We can undress it to see exactly what it's doing. I have written the above code as step-by-step clean code:
+
+```php
+for($i=1; $i<100; $i++) {
+  if(($i%3)==0)
+    echo 'Fizz';
+  else {
+    $$i = $i;
+    echo !$$i;
+  }
+
+  if(($i%5)==0)
+    echo 'Buzz';
+  else
+    echo $$i;
+
+  echo PHP_EOL;
+}
+```
+
+What you're seeing is not a code error. There are double `$$` being used. The structure looks more similar to how I wrote my code at the beginning of this article now, but the logic remains unchanged. The first and second `if` statements both check to see if the current number is a multiple of 3 and 5 respectively, and outputs Fizz and Buzz respectively. The more interesting part is what happens when the number is neither and needs to simply output the number. There is an `echo` happening in both `else` statements so what is going on?
+
+PHP variable naming conventions generally forbids variable names that begin with, or are made up of digits. The variable `$test1` may be declared but `$123` may not, it will throw an error. However, the workaround to this is to have a variable with the number you want, and use _that_ variable with a numeric value to then declare your number-only variable name.
+
+For example:
+```php
+$test = 'variable';
+$$test = 'success!';
+
+var_dump($variable); // string(8) "success!"
+```
+
+We effectively taken `$test` value as a declaration of another variable; therefore, `${$test}`, or `${'variable'}`, or `$variable`. We can set `$test` to a number and PHP will not complain, it will just do it.
+
+```php
+$test = '123';
+$$test = 'success!';
+
+var_dump($123); // * nothing happens *
+```
+
+What happened? It seems PHP still cannot understand variable declarations and variable references with numbers. We can express it by the same way we declared it which was with `$$test`.
+
+```php
+var_dump($$test); // string(8) "success!"
+```
+
+Okay, but why do we care? Why is this useful to us?
+
+In the case of this new FizzBuzz code, this weird behaviour works because we're declaring a numerically-named variable only on condition that the current number is not a multiple of 3. The code `$$i = $i` creates that numeric variable.
+
+One important reason why it works in this case is because `$i` is constantly changing value, therefore `$$i` quickly becomes undefined.
+
+```php
+$test = 1;
+$$test = 'hello';
+var_dump($$test); // string(5) "hello"
+
+$test = 2;
+var_dump($$test); // Undefined variable error
+```
+
+This aids us with the second `if` statement, when `$i` changes value, the `$$i` is then undefined, and the `echo $$i` produces nothing.
+
+Cool, but what is `echo !$$i;` doing?
+
+It does absolutely nothing. It references our number-named variable and sees its value is above zero and is automatically a boolean `true`, then the `!` negates that and returns `false`. Echoing `false` echos nothing at all. In the clean code, that line can be removed without affecting its operation. The only reason it's there is because later these expressions need to be represented as ternery code and are wrapped inside an `echo` so we need a way to force it to output nothing at this point in time, and that's how.
+
+The second `if` statement works more or less as expected from this point. If the current number is a multiple of 5 then output Buzz, otherwise output the current number as stored in `$$i` which is _only_ declared if the first `if` statement was not a multiple of 3 when Fizz was not outputted. If the number was a multiple of 3, but not a multiple of 5, then the `echo $$i` would not output anything, because we made an output of Fizz already and `$$i` remains undefined, therefore empty.
+
+Here's the same code with the ternery operations at play, but laid out in a more readable format.
 
 ```php
 while($i++<100) {
@@ -295,3 +365,25 @@ while($i++<100) {
   echo ~õ;
 }
 ```
+
+The same logic is happening. When the first `if` statement is a multiple of 3, the `echo` expresses the `!$$i = $i` as we've described. The `$$i` is set as `$i`, then whatever `$$i` was actually set to will be then treated as an inverse boolean value which will always be `false` and `echo` outputs nothing but the point of that statement is purely to set `$$i = $i` which is done successfully.
+
+The final `echo ~õ;` as explained above is just a crazy way to get a new line byte outputted.
+
+Then finally, each successive `echo` call can be combined into a single `echo` with multiple arguments.
+
+```php
+while($i++<100)
+  echo $i%3?!$$i=$i:Fizz, $i%5?$$i:Buzz, ~õ;
+```
+
+Remove whitespaces and new lines:
+```php
+while($i++<100)echo$i%3?!$$i=$i:Fizz,$i%5?$$i:Buzz,~õ;
+```
+
+### Closure
+
+After spending all this time writing up this document, as a seasoned code writer, I've had a couple of "Aha!" moments where I've learned something I didn't know before. I hope I was successful at passing on these moments with you.
+
+Thank you for reading.
